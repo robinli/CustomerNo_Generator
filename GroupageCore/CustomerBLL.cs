@@ -1,4 +1,5 @@
-﻿using Microsoft.International.Converters.PinYinConverter;
+﻿using GroupageCore.Model;
+using Microsoft.International.Converters.PinYinConverter;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -7,15 +8,27 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Groupage_client_coder
+namespace GroupageCore
 {
     public class CustomerBLL
     {
-        public List<CustomerInfo> CurrentData { get; private set; }
+        public CustomerDB DB { get; private set; }
+        public List<CustomerInfo> CurrentData { get { return DB.Items; } }
 
-        public void Readdata(string excelFileName)
+        public CustomerBLL()
         {
-            List<CustomerInfo> result = new List<CustomerInfo>();
+            StorageMan<CustomerDB> sm = new StorageMan<CustomerDB>();
+            this.DB = sm.Read();
+        }
+
+        /// <summary>
+        /// 讀取 Excel 檔案作為初始化資料
+        /// </summary>
+        /// <param name="excelFileName"></param>
+        public void Import(string excelFileName)
+        {
+            DB = new CustomerDB();
+            List<CustomerInfo> result = DB.Items;
 
             //開檔
             FileStream fs = new FileStream(excelFileName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
@@ -58,8 +71,6 @@ namespace Groupage_client_coder
             //關閉資源
             ep.Dispose();
             ep = null;
-
-            this.CurrentData = result;
 
             return ;
         }
@@ -105,6 +116,9 @@ namespace Groupage_client_coder
             return;
         }
 
+        /// <summary>
+        /// 重新計算編號
+        /// </summary>
         public void CalcNewCode()
         {
             foreach (CustomerInfo info in this.CurrentData)
@@ -125,13 +139,54 @@ namespace Groupage_client_coder
 
             }
 
-            this.CurrentData = this.CurrentData.OrderBy(r => r.New_Code).ToList();
+            this.DB.Items = this.CurrentData.OrderBy(r => r.New_Code).ToList();
 
             //foreach (CustomerInfo info in this.CurrentData.OrderBy(r => r.Prefix).ThenBy(r => r.Customer_Name))
             //{
             //    info.Prefix = this.GetPinyin(info.Customer_Name);
             //}
         }
+
+        /// <summary>
+        /// 讀取 Excel 檔案作為初始化資料，並儲存至檔案
+        /// </summary>
+        /// <param name="excelFileName"></param>
+        public void ImportThenSave(string excelFileName)
+        {
+            this.Import(excelFileName);
+            this.CalcNewCode();
+            this.SaveChangeToSotrage();
+        }
+
+        /// <summary>
+        /// 新增客戶
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="customerName"></param>
+        public CustomerInfo NewCustomer(string code, string customerName)
+        {
+            CustomerInfo newCustomer=new CustomerInfo(){
+                Customer_Code=code
+                , Customer_Name=customerName
+                , Prefix=this.GetPrefix(customerName)
+            };
+
+            int count = this.DB.Items.Count(r => r.Prefix == newCustomer.Prefix);
+            count += 1;
+
+            newCustomer.New_Code = newCustomer.Prefix + count.ToString("000");
+
+            this.DB.Items.Add(newCustomer);
+            this.SaveChangeToSotrage();
+
+            return newCustomer;
+        }
+        private void SaveChangeToSotrage()
+        {
+            StorageMan<CustomerDB> sm = new StorageMan<CustomerDB>();
+            sm.Save(this.DB);
+        }
+
 
         private string GetPrefix(string source)
         {
@@ -148,7 +203,7 @@ namespace Groupage_client_coder
         /// </summary> 
         /// <param name="str">汉字</param> 
         /// <returns>首字母</returns> 
-        public string GetFirstPinyin(string str)
+        private string GetFirstPinyin(string str)
         {
             string r = string.Empty;
             foreach (char obj in str)
@@ -172,7 +227,7 @@ namespace Groupage_client_coder
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public string ClearString(string source)
+        private string ClearString(string source)
         {
             string pattern = @"\W";
             string result = Regex.Replace(source, pattern, "");
@@ -180,15 +235,15 @@ namespace Groupage_client_coder
         }
     }
 
-    public class CustomerInfo
-    {
-        public string Customer_Code { get; set; }
+    //public class CustomerInfo
+    //{
+    //    public string Customer_Code { get; set; }
 
-        public string Customer_Name { get; set; }
+    //    public string Customer_Name { get; set; }
 
-        public string Prefix { get; set; }
+    //    public string Prefix { get; set; }
 
-        public string New_Code { get; set; }
+    //    public string New_Code { get; set; }
 
-    }
+    //}
 }

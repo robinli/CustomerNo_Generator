@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GroupageCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,7 +23,7 @@ namespace Groupage_client_coder
         {
             if (this.openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK) 
             {
-                BLL.Readdata(this.openFileDialog1.FileName);
+                BLL.Import(this.openFileDialog1.FileName);
                 this.dataGridView1.DataSource = BLL.CurrentData;
             }
         }

@@ -1,0 +1,53 @@
+﻿@model IEnumerable<GroupageCore.Model.CustomerInfo>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Customer_Code)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Customer_Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Prefix)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.New_Code)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Customer_Code)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Customer_Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Prefix)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.New_Code)
+        </td>
+        <td>
+            @Html.ActionLink("Detail", "Detail", new {  id=item.New_Code })
+        </td>
+    </tr>
+}
+
+</table>
+
+<a href=@Url.Action("Import", "Customer") class="btn btn-default btn-info pull-right">
+    <span class="glyphicon glyphicon-upload"> Import</span>
+</a>

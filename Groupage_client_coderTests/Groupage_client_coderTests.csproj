@@ -54,9 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Groupage_client_coder\Groupage_client_coder.csproj">
-      <Project>{88F70E64-0704-4D09-8B5D-C2BF3289B746}</Project>
-      <Name>Groupage_client_coder</Name>
+    <ProjectReference Include="..\GroupageCore\GroupageCore.csproj">
+      <Project>{49b239a9-ae47-49c8-9d83-daf128be17b3}</Project>
+      <Name>GroupageCore</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
